@@ -53,7 +53,7 @@ ActorCtrl.readFromID = function (id, callback) {
 //POST /actors - insere um novo ator
 ActorCtrl.insert = function (params, callback) {
   var imageName = params.name.fileNameClean('.' + params.photo.extension);
-  base64.decode(params.photo.data, './public/images/' + imageName, function (err, output) {
+  base64.decode(params.photo.data, './public/user_images/' + imageName, function (err, output) {
     if (err) {
       callback(response.error(400, err));
       return;
@@ -68,7 +68,7 @@ ActorCtrl.insert = function (params, callback) {
       callback(response.error(400, err));
       return;
     }
-
+    
     ActorCtrl.readFromID(rows.insertId, callback);
   });
 };

@@ -42,7 +42,7 @@ app.get('/movie/:id', function (req, res) {
 
 app.delete('/movie/:id', function (req, res) {
 	var id = req.params["id"];
-	actorCtrl.deleteFromID(id, function (resp) {
+	movieCtrl.deleteFromID(id, function (resp) {
 		res.status(resp.statusCode).json(resp);
 	});
 });
@@ -50,14 +50,14 @@ app.delete('/movie/:id', function (req, res) {
 app.put('/movie/:id', function (req, res) {
 	var id = req.params["id"];
 	var body = req.body;
-	actorCtrl.edit(id, body, function (resp) {
+	movieCtrl.edit(id, body, function (resp) {
 		res.status(resp.statusCode).json(resp);
 	});
 });
 
 app.post('/movies', function (req, res) {
 	var body = req.body;
-	actorCtrl.insert(body, function (resp) {
+	movieCtrl.insert(body, function (resp) {
 		res.status(resp.statusCode).json(resp)
 	});
 });

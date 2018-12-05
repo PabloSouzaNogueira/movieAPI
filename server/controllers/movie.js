@@ -32,10 +32,10 @@ MovieCtrl.readAll = function (callback) {
 //GET /movie/:id - detalhes de um filme
 MovieCtrl.readFromID = function (id, callback) {
   var params = [id];
-  var sql = ' SELECT movie.id, title, movie.photo_url AS photoURL, released_date AS releasedAt, lenght, star.id, star.name, star.photo_url AS startPhotoURL \
+  var sql = ' SELECT movie.id, title, movie.photo_url AS photoURL, released_date AS releasedAt, lenght, star.id AS starId, star.name, star.photo_url AS startPhotoURL \
               FROM movie \
-              INNER JOIN starmovie ON starmovie.movie_id = movie.id \
-              INNER JOIN star ON starmovie.star_id = star.id \
+              LEFT JOIN starmovie ON starmovie.movie_id = movie.id \
+              LEFT JOIN star ON starmovie.star_id = star.id \
               WHERE movie.id = ?';
 
   database.query(sql, params, 'release', function (err, rows) {
@@ -49,25 +49,25 @@ MovieCtrl.readFromID = function (id, callback) {
       return;
     }
 
-    var result = [];
     var actors = [];
-
     for (var i = 0; i < rows.length; i++) {
-      actors.push({ 
-        id: rows[i].id, 
-        name: rows[i].name, 
-        photoURL: rows[i].startPhotoURL 
-      });
+      if (rows[i].starId) {
+        actors.push({
+          id: rows[i].starId,
+          name: rows[i].name,
+          photoURL: rows[i].startPhotoURL
+        });
+      }
     }
 
-    result.push({ 
-      id: rows[0].id, 
-      title: rows[0].title, 
-      photoURL: rows[0].photoURL, 
-      releasedAt: rows[0].releasedAt, 
-      lenght: rows[0].lenght, 
-      actors: actors 
-    });
+    var result = {
+      id: rows[0].id,
+      title: rows[0].title,
+      photoURL: rows[0].photoURL,
+      releasedAt: rows[0].releasedAt,
+      lenght: rows[0].lenght,
+      actors: actors
+    };
 
     return callback(response.result(200, result));
   });
@@ -93,7 +93,8 @@ MovieCtrl.insert = function (params, callback) {
       return;
     }
 
-    MovieCtrl.readFromID(rows.insertId, callback);
+    var id = rows.insertId;
+    MovieCtrl.readFromID(id, callback);
   });
 };
 

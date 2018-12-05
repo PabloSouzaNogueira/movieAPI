@@ -47,37 +47,40 @@ UserMovieCtrl.readAll = function (id, callback) {
         }
 
         result.watched = rows;
-    });
 
-    sql = ' SELECT movie.id, movie.title, movie.photo_url AS photoURL, movie.released_date AS releasedAt FROM user \
-            INNER JOIN usermovie ON user.id = usermovie.user_id \
-            INNER JOIN movie ON usermovie.movie_id = movie.id \
-            WHERE user.id = ? AND usermovie.toWatch = 1';
+        sql = ' SELECT movie.id, movie.title, movie.photo_url AS photoURL, movie.released_date AS releasedAt FROM user \
+        INNER JOIN usermovie ON user.id = usermovie.user_id \
+        INNER JOIN movie ON usermovie.movie_id = movie.id \
+        WHERE user.id = ? AND usermovie.toWatch = 1';
 
-    database.query(sql, params, 'release', function (err, rows) {
-        if (err) {
-            callback(response.error(400, err));
-            return;
-        }
+        database.query(sql, params, 'release', function (err, rows) {
+            if (err) {
+                callback(response.error(400, err));
+                return;
+            }
 
-        result.toWatch = rows;
-    });
+            result.toWatch = rows;
 
-    sql = ' SELECT movie.id, movie.title, movie.photo_url AS photoURL, movie.released_date AS releasedAt FROM user \
+            sql = ' SELECT movie.id, movie.title, movie.photo_url AS photoURL, movie.released_date AS releasedAt FROM user \
             INNER JOIN usermovie ON user.id = usermovie.user_id \
             INNER JOIN movie ON usermovie.movie_id = movie.id \
             WHERE user.id = ? AND usermovie.favorite = 1';
 
-    database.query(sql, params, 'release', function (err, rows) {
-        if (err) {
-            callback(response.error(400, err));
-            return;
-        }
+            database.query(sql, params, 'release', function (err, rows) {
+                if (err) {
+                    callback(response.error(400, err));
+                    return;
+                }
 
-        result.favorite = rows;
+                result.favorite = rows;
 
-        callback(response.result(200, result));
+                callback(response.result(200, result));
+            });
+
+        });
+
     });
+
 };
 
 //POST /user/:id/list - inserir um filme na lista do usuário definindo se foi (Assistido, Assistir e Favorito)
@@ -102,16 +105,41 @@ UserMovieCtrl.insert = function (userId, params, callback) {
         }
     }
 
-    var params = [userId, params.movieId, toWatch, watched, favorite, params.review];
-    var sql = ' INSERT INTO usermovie (user_id, movie_id, toWatch, watched, favorite, review) VALUES (?,?,?,?,?,?)';
+    var paramsSQL = [userId, params.movieId];
+    var sql = 'SELECT * FROM usermovie WHERE user_id = ? AND movie_id = ?';
 
-    database.query(sql, params, 'release', function (err, rows) {
+    database.query(sql, paramsSQL, 'release', function (err, rows) {
         if (err) {
             callback(response.error(400, err));
             return;
         }
 
-        UserMovieCtrl.readAll(userId, callback);
+        if (!rows || rows.length == 0) {
+            paramsSQL = [userId, params.movieId, toWatch, watched, favorite, params.review];
+            sql = ' INSERT INTO usermovie (user_id, movie_id, toWatch, watched, favorite, review) VALUES (?,?,?,?,?,?)';
+
+            database.query(sql, paramsSQL, 'release', function (err, rows) {
+                if (err) {
+                    callback(response.error(400, err));
+                    return;
+                }
+
+                UserMovieCtrl.readAll(userId, callback);
+            });
+
+        } else {
+            paramsSQL = [toWatch, watched, favorite, params.review, userId, params.movieId];
+            sql = ' UPDATE usermovie SET toWatch = ?, watched = ?, favorite = ?, review = ? WHERE user_id = ? AND movie_id = ?';
+
+            database.query(sql, paramsSQL, 'release', function (err, rows) {
+                if (err) {
+                    callback(response.error(400, err));
+                    return;
+                }
+
+                UserMovieCtrl.readAll(userId, callback);
+            });
+        }
     });
 };
 
