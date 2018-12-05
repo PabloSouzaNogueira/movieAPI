@@ -1,23 +1,11 @@
-#Modificações
+#MovieAPI
+API em Node.JS com banco em MySQL.
+Possui várias rotas como:
+- CRUD de Filmes.
+- CRUD de Atores.
+- CRUD de Diretores.
+- Autenticação de Usuário do Facebook.
+- Estatísticas Usuários X Filmes.
 
-* script start/stop
-* Pasta 'public'
-* npm install (lib adicionada: file-base64)
-* Variavel debugMode
-* implementação do endpoint actor com todos os verbos (CRUD)
-* app.route 
-
-##Movies
-/movies
-/movie/:id
-
-##Auth
-/auth/signin
-
-##Actor
-/actors
-/actor/:id
-
-##Director
-/directors
-/director/:id
+##Collections Postman
+As rotas da API estão na raiz desse repositório no arquivo "Collection movieAPI.json"
